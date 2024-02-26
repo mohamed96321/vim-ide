@@ -50,6 +50,13 @@ In mode `COMMAND` using `:PlugInstall` inside vim by open vim using `vim` comman
 }
 ```
 
+## Telescope Plugin
+Telescope is an amazing plugin that provides fuzzy searching capabilities. You can use it to search and navigate through all of the files.
+You can install it by using the following command inside .vimrc file:
+```
+Plug 'nvim-telescope/telescope.nvim'
+```
+
 ## Vim Commands
 All commands that are used in this vim configuration.
 
