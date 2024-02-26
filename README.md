@@ -18,7 +18,7 @@ curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
 Create a `.vimrc` file in your home directory, for example in Windows: `C:\Users\username`
 
 ## Install Plugins
-In mode `COMMAND` using `:PlugInstall` in your `.vimrc` file to install plugins
+In mode `COMMAND` using `:PlugInstall` inside vim by open vim using `vim` command in bash to install plugins.
 
 ## Vim Modes
 1. Default mode is `NORMAL`, you can back to normal mode by press `Esc` in Windows, which means you can switch between different modes and copy, past, undo, and movement in file.
@@ -33,7 +33,8 @@ In mode `COMMAND` using `:PlugInstall` in your `.vimrc` file to install plugins
   "python.autoComplete.extraPaths": ["python3.11"],
   "python.linting.pylintPath": "python3.11",
   "snippets.ultisnips.pythonPrompt": false,
-  // if you want to add other programming languages not downloaded from coc-global extensions
+
+  "_comments": "This is a comment. If you want to add other programming languages not downloaded from coc-global extensions, using languageserver, please remove this _comments",
   "languageserver": {
     "ruby": {
       "command": "solargraph",
