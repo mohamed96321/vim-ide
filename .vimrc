@@ -63,8 +63,11 @@ nnoremap <C-a> ggVG
 " Open file explorer with 'pv'
 nnoremap <leader>pv :Ex<CR>
 
-" Open terminal with 't'
+" Open terminal with 't' and use vi <filename.type> not vim
 nnoremap <leader>t :term<CR>
+
+" Run file in `COMMAND` with 'te'
+nnoremap <leader>te :term<Space>
 
 " Close terminal with 'Esc'
 tnoremap <Esc> <C-\><C-n>:q!<CR>
