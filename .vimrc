@@ -63,8 +63,14 @@ nnoremap <C-a> ggVG
 " Open file explorer with 'pv'
 nnoremap <leader>pv :Ex<CR>
 
-" Create and Open new file in new tab with 't'
-nnoremap <leader>t :call CreateAndOpenNewFile()<CR>
+" Open terminal with 't'
+nnoremap <leader>t :term<CR>
+
+" Close terminal with 'Esc'
+tnoremap <Esc> <C-\><C-n>:q!<CR>
+
+" Create and Open new file in new tab with 'c'
+nnoremap <leader>c :call CreateAndOpenNewFile()<CR>
 
 function! CreateAndOpenNewFile()
     let fileName = input('Enter filename with type: ')
