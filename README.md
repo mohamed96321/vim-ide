@@ -177,7 +177,9 @@ In `NORMAL` mode:
 CTRL + n -- to open :NERDTreeToggle
 CTRL + a -- to select all
 ,pv -- to open file explorer
-,t -- to create and open new file in new tab
+,t -- to open terminal
+Esc -- to close terminal
+,c -- to create and open new file in new tab
 ,cn -- to move and rename file to different folder
 ,d -- to create new folder
 ,o -- to create or open new file in new tab
