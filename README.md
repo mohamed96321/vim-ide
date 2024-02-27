@@ -22,7 +22,7 @@ In mode `COMMAND` using `:PlugInstall` inside vim by open vim using `vim` comman
 
 ## Vim Modes
 1. Default mode is `NORMAL`, you can back to normal mode by press `Esc` in Windows, which means you can switch between different modes and copy, past, undo, and movement in file.
-2. Command mode is `COMMAND`, to choice this mode by press `Shift + ;` in Windows, which means you can write VIM Commands in this mode.
+2. Command mode is `COMMAND`, to choice this mode by press `Shift + ;` together to make `:` in Windows, which means you can write VIM Commands in this mode.
 3. Visual mode is `VISUAL`, you can choice this mode by press `v` in Windows, which means you can select the spcific lines of code and make changes on it.
 
 ## Coc Settings
@@ -170,5 +170,23 @@ m{letter} - Set a mark at the current cursor position with {letter}
 :CocCommand
 ```
 
+## My Custom Keymap Shortcuts
+In `NORMAL` mode:
+`<leader>` by default equal `space`(in keyboard), but i set it to equal `,`(in keyboard).
+```
+CTRL + n -- to open :NERDTreeToggle
+CTRL + a -- to select all
+,pv -- to open file explorer
+,t -- to create and open new file in new tab
+,cn -- to move and rename file to different folder
+,d -- to create new folder
+,o -- to create or open new file in new tab
+,tc -- to close current tab
+,tp -- to move tp prev tab
+,tn -- to move tp next tab
+```
 ## Codeium
 In this vim ide, I'm using Codeium free AI pair programmer, you can use Github Copilot instead.
+
+## License
+**MIT**
