@@ -32,21 +32,7 @@ In mode `COMMAND` using `:PlugInstall` inside vim by open vim using `vim` comman
   "python.pythonPath": "python3.11",
   "python.autoComplete.extraPaths": ["python3.11"],
   "python.linting.pylintPath": "python3.11",
-  "snippets.ultisnips.pythonPrompt": false,
-
-  "_comments": "This is a comment. If you want to add other programming languages not downloaded from coc-global extensions, using languageserver, please remove this _comments",
-  "languageserver": {
-    "ruby": {
-      "command": "solargraph",
-      "args": ["stdio"],
-      "filetypes": ["ruby"]
-    },
-    "rust": {
-      "command": "rustup",
-      "args": ["run", "stable", "rust-analyzer"],
-      "filetypes": ["rust"]
-    },
-  }
+  "snippets.ultisnips.pythonPrompt": false
 }
 ```
 
