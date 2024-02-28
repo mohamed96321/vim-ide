@@ -164,18 +164,23 @@ m{letter} - Set a mark at the current cursor position with {letter}
 In `NORMAL` mode:
 `<leader>` by default equal `space`(in keyboard), but i set it to equal `,`(in keyboard).
 ```
-CTRL + n -- to open :NERDTreeToggle
-CTRL + a -- to select all
-,pv -- to open file explorer
-,t -- to open terminal
-Esc -- to close terminal
-,c -- to create and open new file in new tab
-,cn -- to move and rename file to different folder
-,d -- to create new folder
-,o -- to create or open new file in new tab
-,tc -- to close current tab
-,tp -- to move tp prev tab
-,tn -- to move tp next tab
+CTRL + n `to open :NERDTreeToggle`
+CTRL + a `Selects the entire buffer in normal mode`
+,pv `Opens the file explorer`
+,t `Opens a terminal`
+,r `Runs the current file in a terminal using the `COMMAND` specified`
+Esc `Closes the terminal window`
+,n `Opens a new tab`
+,c `Prompts the user to create and open a new file in a new tab`
+,cn `Prompts the user to move and rename the current file`
+,f `Create folder`
+,cf `Create new file in any existing directory`
+,e `Open existing file in any existing directory in a new tab`
+,df `Delete file`
+,dd `Delete directory with`
+,tn `Move to next tab`
+,tp `Move to previous tab`
+,tc `Close current tab`
 ```
 ## Codeium
 In this vim ide, I'm using Codeium free AI pair programmer, you can use Github Copilot instead.
