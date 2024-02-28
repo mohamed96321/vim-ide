@@ -167,7 +167,6 @@ function! CreateFolder()
     endif
 endfunction
 
-<<<<<<< HEAD
 " Create new file in any existing directory with 'cf'
 nnoremap <leader>cf :call CreateNewFileInAnyExistingDirection()<CR>
 
@@ -200,15 +199,6 @@ nnoremap <leader>e :call OpenExistingFile()<CR>
 " Function to open existing files in a new tab
 function! OpenExistingFile()
     let file_path = input('Open file in a new tab in existing directory: ', g:current_directory . '\')
-=======
-" Open existing file in a new tab with 'o'
-nnoremap <leader>o :call OpenExistingFile()<CR>
-
-" Function to open existing files in a new tab
-function! OpenExistingFile()
-    let current_directory = expand('%:p:h')
-    let file_path = input('Open file in a new tab in existing directory: ', current_directory . '/')
->>>>>>> 7881101c1653afba371ddb49e842d589678e4bcc
 
     let expanded_path = expand(file_path)
     if !isdirectory(expanded_path) && !filereadable(expanded_path)
