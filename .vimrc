@@ -116,6 +116,11 @@ function! MoveAndRenameFile()
             return
         endif
 
+        if filereadable(newFilePath)
+            echomsg 'Error: File with the same name already exists in the specified directory.'
+            return
+        endif
+
         if newPath != '' && !isdirectory(newPath)
             call mkdir(newPath, 'p')
         endif
@@ -144,13 +149,13 @@ function! CreateFolder()
     endif
 endfunction
 
-" Create or Open existing file in a new tab with 'o'
+" Open existing file in a new tab with 'o'
 nnoremap <leader>o :call OpenExistingFile()<CR>
 
 " Function to open existing files in a new tab
 function! OpenExistingFile()
     let current_directory = expand('%:p:h')
-    let file_path = input('Create or Open file in a new tab in existing directory: ', current_directory . '/')
+    let file_path = input('Open file in a new tab in existing directory: ', current_directory . '/')
 
     let expanded_path = expand(file_path)
     if !isdirectory(expanded_path) && !filereadable(expanded_path)
@@ -160,9 +165,9 @@ function! OpenExistingFile()
 
     try
         execute 'tabedit ' . expanded_path
-        echo "Opened and editing: " . expanded_path . " in a new tab."
+        echo "Opened: " . expanded_path . " in a new tab."
     catch
-        echomsg 'Error: Unable to open or edit the file.'
+        echomsg 'Error: Unable to open the file.'
     endtry
 endfunction
 
