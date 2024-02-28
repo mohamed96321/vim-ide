@@ -26,13 +26,10 @@ In mode `COMMAND` using `:PlugInstall` inside vim by open vim using `vim` comman
 3. Visual mode is `VISUAL`, you can choice this mode by press `v` in Windows, which means you can select the spcific lines of code and make changes on it.
 
 ## Coc Settings
+Open vim and switch to `COMMAND` mode and run this command to open coc-settings.json file `:CocConfig`, and add this line inside it.
 ```json
 {
   "snippets.userSnippetsDirectory": "~/.config/coc/ultisnips",
-  "python.pythonPath": "python3.11",
-  "python.autoComplete.extraPaths": ["python3.11"],
-  "python.linting.pylintPath": "python3.11",
-  "snippets.ultisnips.pythonPrompt": false
 }
 ```
 
