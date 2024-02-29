@@ -28,6 +28,7 @@ let mapleader = ","
 " Plugin settings
 call plug#begin('~/.vim/plugged')
 Plug 'vim-airline/vim-airline'
+Plug 'nvim-telescope/telescope.nvim'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
@@ -35,7 +36,6 @@ Plug 'tc50cal/vim-terminal'
 Plug 'preservim/nerdtree'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'prettier/vim-prettier', {'do': 'npm install'}
-Plug 'tell-k/vim-autopep8'
 Plug 'haishanh/night-owl.vim'
 Plug 'Exafunction/codeium.vim'
 call plug#end()
@@ -304,23 +304,6 @@ let g:prettier#config#tab_width = 4
 
 " Format JavaScript, TypeScript, JSON, CSS, SCSS, Markdown, and other files with Prettier
 autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx,*.json,*.css,*.scss,*.md,*.mjs,*.cjs,*.html,*.yaml,*.yml,*.graphql,*.gql,*.vue,*.svelte silent! :Prettier
-
-" Autopep8 settings
-let g:autopep8_disable_show_diff=1
-let g:autopep8_max_line_length=120
-let g:autopep8_indent_size=4
-let g:autopep8_aggressive=1
-let g:autopep8_pep8_passes=100
-let g:autopep8_pep8_naming=1
-let g:autopep8_ignore=1
-let g:autopep8_max_aggressive=1
-let g:autopep8_use_aggressive_lines=1
-let g:autopep8_diff_type='vertical'
-let g:autopep8_ignore_invalidintr=1
-let g:autopep8_on_save = 1
-
-" Autopep8 on save with a
-autocmd BufWritePost *.py :Autopep8
 
 " Theme settings and enable transparency
 colorscheme night-owl
