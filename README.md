@@ -134,6 +134,8 @@ Ctrl + f - Move one page down
 ```
 >> - Indent the current line
 << - Unindent the current line
+Shift + . `indent`
+Shift + , `unindent`
 ```
 
 **Marks:**
@@ -181,6 +183,10 @@ Esc `Closes the terminal window`
 ,tn `Move to next tab`
 ,tp `Move to previous tab`
 ,tc `Close current tab`
+Shift + j `Move the line down`
+Shift + k `Move the line up`
+Shift + u `Copy the line up`
+Shift + d `Copy the line down`
 ```
 ## Codeium
 In this vim ide, I'm using Codeium free AI pair programmer, you can use Github Copilot instead.

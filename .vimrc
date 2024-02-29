@@ -277,6 +277,14 @@ nnoremap <leader>tp :tabprev<CR>
 " Close current tab
 nnoremap <leader>tc :tabclose<CR>
 
+" Move The Line: Shift + j and Shift + k
+nnoremap <S-j> :m .+1<CR>==
+nnoremap <S-k> :m .-2<CR>==
+
+" Copy Line Up Down: Shift + u and Shift + d
+nnoremap <S-d> :t .+1<CR>==
+nnoremap <S-u> :t .-1<CR>==
+
 " coc.nvim settings
 let g:coc_global_extensions = [
       \ 'coc-snippets',
