@@ -305,7 +305,7 @@ let g:prettier#config#tab_width = 4
 " Format JavaScript, TypeScript, JSON, CSS, SCSS, Markdown, and other files with Prettier
 autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx,*.json,*.css,*.scss,*.md,*.mjs,*.cjs,*.html,*.yaml,*.yml,*.graphql,*.gql,*.vue,*.svelte silent! :Prettier
 
-" Theme settings and enable transparency
+" Theme settings and enable transparency(To enable transparency in terminal on windows, open terminal settings, and then open json JSON file, and in "profiles" inside "defaults" put this line: "opacity": 70 )
 colorscheme night-owl
 hi Normal ctermbg=none
 hi NonText ctermbg=none
