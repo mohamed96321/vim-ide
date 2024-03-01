@@ -150,7 +150,7 @@ function! CreateFolder()
     let target_directory = input('Enter existing directory(press Enter to use current directory): ', g:current_directory, 'dir')
 
     if empty(target_directory)
-        let target_directory = current_directory
+        let target_directory = g:current_directory
     endif
 
     let full_path = target_directory . '\' . folder_name
