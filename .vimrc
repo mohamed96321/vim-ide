@@ -28,14 +28,33 @@ let mapleader = ","
 " Plugin settings
 call plug#begin('~/.vim/plugged')
 Plug 'vim-airline/vim-airline'
-Plug 'nvim-telescope/telescope.nvim'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'tc50cal/vim-terminal'
 Plug 'preservim/nerdtree'
+" Plug 'rust-lang/rust.vim'
+" Plug 'vim-syntastic/syntastic'
+" Plug 'neomake/neomake'
+" Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+" Plug 'neovim/nvim-lspconfig'
+" Plug 'nvim-lua/completion-nvim'
+" Plug 'nvim-telescope/telescope.nvim'
+" Plug 'vim-airline/vim-airline-themes'":AirlineTheme deus
+" Plug 'airblade/vim-gitgutter'
+" Plug 'scrooloose/nerdcommenter'
+" Plug 'sheerun/vim-polyglot'
+" Plug 'vimwiki/vimwiki'
+" Plug 'w0rp/ale'
+" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+" Plug 'junegunn/fzf.vim'
+" Plug 'dense-analysis/ale'
+" Plug 'udalov/kotlin-vim'
+" Plug 'sumneko/lua-language-server', { 'do': ':lua vim.lsp.buf.add_workspace_folder()' }
+" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug  'vim-ruby/vim-ruby'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'prettier/vim-prettier', {'do': 'npm install'}
+Plug 'prettier/vim-prettier', {'do': 'npm install -g prettier'}
 Plug 'haishanh/night-owl.vim'
 Plug 'Exafunction/codeium.vim'
 call plug#end()
@@ -81,13 +100,17 @@ tnoremap <Esc> <C-\><C-n>:q!<CR>
 " Open new tab with 'n'
 nnoremap <leader>n :tabnew<CR>
 
+" Define separator & current_directory as global variables
+let g:separator = '/'
+let g:current_directory = expand('%:p:h')
+
 " Create and Open new file in new tab with 'c'
 nnoremap <leader>c :call CreateAndOpenNewFile()<CR>
 
 function! CreateAndOpenNewFile()
-    let fileName = input('Enter filename with type: ')
-    if empty(fileName)
-        echomsg 'Error: Please enter a valid filename with type.'
+    let fileName = input('Enter filename with extension: ')
+    if empty(fileName) || fileName == ''
+        echomsg 'Error: Please enter a valid filename.'
         return
     endif
 
@@ -107,53 +130,87 @@ function! MoveAndRenameFile()
     let currentFileType = &filetype
 
     let newName = input('Enter new name for file (press Enter to keep current name): ', fnamemodify(currentFile, ':t'))
+
+    if empty(newName) || newName == ''
+        echomsg 'Error: Please enter a new name.'
+        return
+    endif
+
     let newPath = input('Enter new path (press Enter to keep current directory): ', fnamemodify(currentFile, ':p:h'))
 
     try
-        if newName == '' && newPath == ''
-            echomsg 'Error: Please enter a new name or a new path.'
+        if newPath == ''
+            echomsg 'Error: Please enter a new path.'
             return
         endif
 
-        let newFilePath = newPath . '\' . (newName != '' ? newName : fnamemodify(currentFile, ':t'))
+        let newFilePath = newPath . g:separator . newName
 
         if newFilePath == currentFile
-            echomsg 'Error: The file is already in the specified directory.'
+    	    if filereadable(newFilePath)
+                echomsg 'File with the same name already exists in the current directory.'
+                return
+            endif
+            echomsg 'File is already in the specified directory.'
             return
         endif
 
         if filereadable(newFilePath)
-            echomsg 'Error: File with the same name already exists in the specified directory.'
-            return
+            if newName != '' && newPath != ''
+                let options = confirm("File with the same name already exists in the specified directory.\n1- Open the existing file in new tab\n2- Replace the file being moved\n3- Keep all and don't replace", "&Open Existing\n&Replace\n&Keep All", 3)
+                if options == 1
+                    execute 'tabedit ' . newFilePath
+                    return
+                elseif options == 2
+                    call delete(newFilePath)
+                elseif options == 3
+                    return
+                else
+                    echomsg 'Invalid option selected. File not moved.'
+                    return
+                endif
+            elseif newName == '' && newPath != ''
+                let overwrite = confirm("File with the same name already exists. Open the existing file?", "&Yes\n&No", 2)
+                if overwrite == 1
+                    execute 'tabedit ' . newFilePath
+                    return
+                else
+                    echomsg 'File not moved.'
+                    return
+                endif
+            endif
         endif
 
         if newPath != '' && !isdirectory(newPath)
             call mkdir(newPath, 'p')
         endif
 
-        call rename(currentFile, newFilePath)
+        let moveCommand = 'mv ' . shellescape(currentFile) . ' ' . shellescape(newFilePath)
+        call system(moveCommand)
         execute 'edit ' . newFilePath
-        echomsg 'File moved and opened: ' . newFilePath
+        echomsg 'Operation successful.'
     catch
-        echomsg 'Error: Unable to move or open the file.'
+        echomsg 'Error: Unable to move or rename the file.'
     endtry
 endfunction
 
-" Define current_directory as a global variable
-let g:current_directory = expand('%:p:h')
+" Create directory with 'cd'
+nnoremap <leader>cd :call CreateDirectory()<CR>
 
-" Create folder with 'f'
-nnoremap <leader>f :call CreateFolder()<CR>
-
-function! CreateFolder()
+function! CreateDirectory()
     let folder_name = input('Enter folder name: ')
-    let target_directory = input('Enter existing directory(press Enter to use current directory): ', g:current_directory, 'dir')
+    if empty(folder_name) || folder_name == ''
+        echomsg 'Error: Please enter a valid folder name.'
+        return
+    endif
+
+    let target_directory = input('Enter the path of directory (or press Enter to use current directory): ', g:current_directory, 'dir')
 
     if empty(target_directory)
         let target_directory = g:current_directory
     endif
 
-    let full_path = target_directory . '\' . folder_name
+    let full_path = fnamemodify(target_directory . g:separator . folder_name, ':p')
 
     if isdirectory(target_directory)
         if !isdirectory(full_path)
@@ -171,47 +228,46 @@ endfunction
 nnoremap <leader>cf :call CreateNewFileInAnyExistingDirection()<CR>
 
 function! CreateNewFileInAnyExistingDirection()
-    let existing_directory = input('Enter existing directory: ', g:current_directory . '\', 'file')
+    let newFileName = input('Enter filename with extension: ', '', 'file')
+    if empty(newFileName) || newFileName == ''
+        echomsg 'Error: Please enter a valid filename.'
+        return
+    endif
+
+    let existing_directory = input('Enter existing directory: ', g:current_directory, 'file')
     let existing_directory = fnamemodify(existing_directory, ':p:h')
 
     if isdirectory(existing_directory)
-        let newFileName = input('Enter new filename with type: ', '', 'file')
-        if newFileName != ''
-            let newFilePath = existing_directory . '\' . newFileName
-            try
-                call writefile([], newFilePath)
-                execute 'edit ' . newFilePath
-                echomsg 'New file created and opened: ' . newFilePath
-            catch
-                echomsg 'Error: Unable to create or open the file.'
-            endtry
-        else
-            echomsg 'Error: Please enter a valid file name.'
-        endif
+        let newFilePath = fnamemodify(existing_directory . g:separator . newFileName, ':p')
+        try
+            call writefile([], newFilePath)
+            execute 'edit ' . newFilePath
+            echomsg 'New file created and opened: ' . newFilePath
+        catch
+            echomsg 'Error: Unable to create or open the file.'
+        endtry
     else
         echomsg 'Error: Invalid directory.'
     endif
 endfunction
 
-" Open existing file in any esisting directory in a new tab with 'e'
+" Open existing file in directory in a new tab with 'e'
 nnoremap <leader>e :call OpenExistingFile()<CR>
 
-" Function to open existing files in a new tab
 function! OpenExistingFile()
-    let file_path = input('Open file in a new tab in existing directory: ', g:current_directory . '\')
+    let file_path = input('Open file in an existing directory: ', g:current_directory . g:separator, 'file')
 
-    let expanded_path = expand(file_path)
-    if !isdirectory(expanded_path) && !filereadable(expanded_path)
-        echo "Error: File or directory does not exist: " . expanded_path
-        return
+    let expanded_path = fnamemodify(expand(file_path), ':p')
+    if !isdirectory(expanded_path) && filereadable(expanded_path)
+        try
+            execute 'tabedit ' . expanded_path
+            echo "Opened: " . expanded_path . " in a new tab."
+        catch
+            echomsg 'Error: Unable to open the file.'
+        endtry
+    else
+        echo "Error: File does not exist or is a directory: " . expanded_path
     endif
-
-    try
-        execute 'tabedit ' . expanded_path
-        echo "Opened: " . expanded_path . " in a new tab."
-    catch
-        echomsg 'Error: Unable to open the file.'
-    endtry
 endfunction
 
 " Delete file with 'df'
@@ -221,20 +277,20 @@ function! DeleteFileFromAnyExistingDirection()
     let fileName = input('Enter filename to delete: ', '', 'file')
 
     if fileName != ''
-        let existing_directory = input('Enter existing directory: ', g:current_directory . '\', 'file')
+        let existing_directory = input('Enter existing directory: ', g:current_directory, 'file')
         let existing_directory = fnamemodify(existing_directory, ':p:h')
 
-        let filePath = existing_directory . '\' . fileName
+        let filePath = fnamemodify(existing_directory . g:separator . fileName, ':p')
 
         if filereadable(filePath)
             try
                 call delete(filePath)
                 echomsg 'File deleted: ' . filePath
             catch
-                echomsg 'Error: Unable to delete the file.'
+                echomsg 'Error: Unable to delete the file. Check file permissions.'
             endtry
         else
-            echomsg 'Error: File does not exist at specified location.'
+            echomsg 'Error: File does not exist at the specified location.'
         endif
     else
         echomsg 'Error: Please enter a valid file name.'
@@ -248,20 +304,20 @@ function! DeleteDirectoryFromAnyExistingDirection()
     let directoryName = input('Enter directory name to delete: ', '', 'dir')
 
     if directoryName != ''
-        let existing_directory = input('Enter existing directory: ', g:current_directory . '\', 'dir')
+        let existing_directory = input('Enter existing directory: ', g:current_directory, 'dir')
         let existing_directory = fnamemodify(existing_directory, ':p:h')
 
-        let directoryPath = existing_directory . '/' . directoryName
+        let directoryPath = fnamemodify(existing_directory . g:separator . directoryName, ':p')
 
         if isdirectory(directoryPath)
             try
                 call delete(directoryPath, 'rf')
-                echomsg 'Directory deleted: ' . directoryPath
+                echomsg 'The directory with name (' . directoryName . ') deleted'
             catch
-                echomsg 'Error: Unable to delete the directory.'
+                echomsg 'Error: Unable to delete the directory. Check directory permissions.'
             endtry
         else
-            echomsg 'Error: Directory does not exist at specified location.'
+            echomsg 'Error: Directory does not exist at the specified location.'
         endif
     else
         echomsg 'Error: Please enter a valid directory name.'
@@ -277,13 +333,17 @@ nnoremap <leader>tp :tabprev<CR>
 " Close current tab
 nnoremap <leader>tc :tabclose<CR>
 
-" Move The Line: Shift + j and Shift + k
+" Move The Line Down And Up: Shift + j and Shift + k
 nnoremap <S-j> :m .+1<CR>==
 nnoremap <S-k> :m .-2<CR>==
 
-" Copy Line Up Down: Shift + u and Shift + d
+" Copy Line Up And Down: Shift + u and Shift + d
 nnoremap <S-d> :t .+1<CR>==
 nnoremap <S-u> :t .-1<CR>==
+
+" Install rust-analyzer via:CocInstall coc-rust-analyzer
+
+" Lua Unsupported In Windows
 
 " coc.nvim settings
 let g:coc_global_extensions = [
@@ -313,7 +373,7 @@ let g:prettier#config#tab_width = 4
 " Format JavaScript, TypeScript, JSON, CSS, SCSS, Markdown, and other files with Prettier
 autocmd BufWritePre *.js,*.jsx,*.ts,*.tsx,*.json,*.css,*.scss,*.md,*.mjs,*.cjs,*.html,*.yaml,*.yml,*.graphql,*.gql,*.vue,*.svelte silent! :Prettier
 
-" Theme settings and enable transparency(To enable transparency in terminal on windows, open terminal settings, and then open json JSON file, and in "profiles" inside "defaults" put this line: "opacity": 70 )
+" Theme settings and enable transparency
 colorscheme night-owl
 hi Normal ctermbg=none
 hi NonText ctermbg=none

@@ -175,7 +175,7 @@ Esc `Closes the terminal window`
 ,n `Opens a new tab`
 ,c `Prompts the user to create and open a new file in a new tab`
 ,cn `Prompts the user to move and rename the current file`
-,f `Create folder`
+,cd `Create folder`
 ,cf `Create new file in any existing directory`
 ,e `Open existing file in any existing directory in a new tab`
 ,df `Delete file`
