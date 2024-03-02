@@ -102,14 +102,18 @@ nnoremap <leader>n :tabnew<CR>
 
 " Define separator & current_directory as global variables
 let g:separator = '/'
-let g:current_directory = expand('%:p:h')
+let g:current_directory = getcwd()
+
+function! CreatePath(input_path)
+    return empty(a:input_path) ? g:current_directory : fnamemodify(a:input_path, ':p:h')
+endfunction
 
 " Create and Open new file in new tab with 'c'
 nnoremap <leader>c :call CreateAndOpenNewFile()<CR>
 
 function! CreateAndOpenNewFile()
     let fileName = input('Enter filename with extension: ')
-    if empty(fileName) || fileName == ''
+    if empty(fileName)
         echomsg 'Error: Please enter a valid filename.'
         return
     endif
@@ -126,119 +130,151 @@ endfunction
 nnoremap <leader>cn :call MoveAndRenameFile()<CR>
 
 function! MoveAndRenameFile()
-    let currentFile = expand('%:p')
-    let currentFileType = &filetype
+    let l:currentFile = expand('%:p')
+    let l:currentFileType = &filetype
 
-    let newName = input('Enter new name for file (press Enter to keep current name): ', fnamemodify(currentFile, ':t'))
+    let l:newName = input('Enter new name for the file (press Enter to keep the current name): ', fnamemodify(l:currentFile, ':t'))
 
-    if empty(newName) || newName == ''
+    if empty(l:newName) || l:newName == ''
         echomsg 'Error: Please enter a new name.'
         return
     endif
 
-    let newPath = input('Enter new path (press Enter to keep current directory): ', fnamemodify(currentFile, ':p:h'))
+    let l:newPath = input('Enter new path (press Enter to keep the current directory): ', fnamemodify(l:currentFile, ':p:h'))
 
     try
-        if newPath == ''
+        if l:newPath == ''
             echomsg 'Error: Please enter a new path.'
             return
         endif
 
-        let newFilePath = newPath . g:separator . newName
+        let l:newFilePath = l:newPath . g:separator . l:newName
 
-        if newFilePath == currentFile
-    	    if filereadable(newFilePath)
-                echomsg 'File with the same name already exists in the current directory.'
+         if l:newFilePath == l:currentFile
+            if filereadable(l:currentFile)
+                echomsg 'Error: File with the same name already exists in the current directory.'
+                return
+            else
+                echomsg 'File is already in the specified directory.'
                 return
             endif
-            echomsg 'File is already in the specified directory.'
+        endif
+
+        if filereadable(l:newFilePath)
+            let l:options = confirm("File with the same name already exists in the specified directory.\n1- Open the existing file in a new tab\n2- Replace the file being moved\n3- Keep all and don't replace", "&Open Existing\n&Replace\n&Keep All", 3)
+            call HandleExistingFile(l:options, l:newFilePath)
             return
         endif
-
-        if filereadable(newFilePath)
-            if newName != '' && newPath != ''
-                let options = confirm("File with the same name already exists in the specified directory.\n1- Open the existing file in new tab\n2- Replace the file being moved\n3- Keep all and don't replace", "&Open Existing\n&Replace\n&Keep All", 3)
-                if options == 1
-                    execute 'tabedit ' . newFilePath
-                    return
-                elseif options == 2
-                    call delete(newFilePath)
-                elseif options == 3
-                    return
-                else
-                    echomsg 'Invalid option selected. File not moved.'
-                    return
-                endif
-            elseif newName == '' && newPath != ''
-                let overwrite = confirm("File with the same name already exists. Open the existing file?", "&Yes\n&No", 2)
-                if overwrite == 1
-                    execute 'tabedit ' . newFilePath
-                    return
-                else
-                    echomsg 'File not moved.'
-                    return
-                endif
-            endif
+        
+        if l:newPath != '' && !isdirectory(l:newPath)
+            try
+                call mkdir(l:newPath, 'p')
+            catch
+                echomsg 'Error: Unable to create the specified directory.'
+                return
+            endtry
         endif
 
-        if newPath != '' && !isdirectory(newPath)
-            call mkdir(newPath, 'p')
+        let l:moveCommand = 'mv ' . shellescape(l:currentFile) . ' ' . shellescape(l:newFilePath)
+
+        " For Windows compatibility, use the 'move' command instead of 'mv'
+        if has('win32') || has('win64')
+            let l:moveCommand = 'move /Y ' . shellescape(l:currentFile) . ' ' . shellescape(l:newFilePath)
         endif
 
-        let moveCommand = 'mv ' . shellescape(currentFile) . ' ' . shellescape(newFilePath)
-        call system(moveCommand)
-        execute 'edit ' . newFilePath
-        echomsg 'Operation successful.'
+        let l:moveResult = system(l:moveCommand)
+
+        " Check if the move operation was successful (on Windows, 'move' command doesn't return a value)
+        if l:moveResult == 0 || (has('win32') || has('win64'))
+            try
+                execute 'edit ' . l:newFilePath
+            catch
+                echomsg 'Error: Unable to open the new file in the editor.'
+                return
+            endtry
+            echomsg 'Operation successful.'
+        else
+            echomsg 'Error: Unable to move or rename the file.'
+        endif
     catch
         echomsg 'Error: Unable to move or rename the file.'
     endtry
+endfunction
+
+function! HandleExistingFile(choice, filePath)
+    if a:choice == 1
+        try
+            execute 'tabedit ' . a:filePath
+        catch
+            echomsg 'Error: Unable to open the existing file in a new tab.'
+            return
+        endtry
+    elseif a:choice == 2
+        try
+            call delete(a:filePath)
+        catch
+            echomsg 'Error: Unable to delete the existing file. Check file permissions.'
+            return
+        endtry
+    elseif a:choice == 3
+        return
+    else
+        echomsg 'Invalid option selected. File not moved.'
+        return
+    endif
 endfunction
 
 " Create directory with 'cd'
 nnoremap <leader>cd :call CreateDirectory()<CR>
 
 function! CreateDirectory()
-    let folder_name = input('Enter folder name: ')
-    if empty(folder_name) || folder_name == ''
+    let l:folder_name = input('Enter folder name: ')
+    if empty(l:folder_name) || l:folder_name == ''
         echomsg 'Error: Please enter a valid folder name.'
         return
     endif
 
-    let target_directory = input('Enter the path of directory (or press Enter to use current directory): ', g:current_directory, 'dir')
+    let l:target_directory = input('Enter the path of the directory (or press Enter to use the current directory): ', g:current_directory, 'dir')
 
-    if empty(target_directory)
-        let target_directory = g:current_directory
+    if empty(l:target_directory)
+        let l:target_directory = g:current_directory
     endif
 
-    let full_path = fnamemodify(target_directory . g:separator . folder_name, ':p')
+    let l:full_path = fnamemodify(l:target_directory . g:separator . l:folder_name, ':p')
 
-    if isdirectory(target_directory)
-        if !isdirectory(full_path)
-            call mkdir(full_path, 'p')
-            echo 'Folder created: ' . full_path
+    try
+        if isdirectory(l:full_path)
+            echo 'Error: Folder already exists: ' . l:full_path
         else
-            echo 'Folder already exists: ' . full_path
+            call mkdir(l:full_path, 'p')
+            if isdirectory(l:full_path)
+                echo 'Folder created: ' . l:full_path
+            else
+                echo 'Error: Unable to create the folder.'
+            endif
         endif
-    else
-        echo 'Error: Invalid target directory.'
-    endif
+    catch
+        echo 'Error: Unable to create the folder.'
+    endtry
 endfunction
 
 " Create new file in any existing directory with 'cf'
+" Note: We should make a new tab first with 'n'
+" Because it's opened in a current tab by default
 nnoremap <leader>cf :call CreateNewFileInAnyExistingDirection()<CR>
 
 function! CreateNewFileInAnyExistingDirection()
     let newFileName = input('Enter filename with extension: ', '', 'file')
-    if empty(newFileName) || newFileName == ''
+    if empty(newFileName)
         echomsg 'Error: Please enter a valid filename.'
         return
     endif
 
-    let existing_directory = input('Enter existing directory: ', g:current_directory, 'file')
-    let existing_directory = fnamemodify(existing_directory, ':p:h')
+    let existingDirectory = input('Enter existing directory: ', g:current_directory, 'file')
+    let existingDirectory = CreatePath(existingDirectory)
 
-    if isdirectory(existing_directory)
-        let newFilePath = fnamemodify(existing_directory . g:separator . newFileName, ':p')
+    if isdirectory(existingDirectory)
+        let newFilePath = fnamemodify(existingDirectory . g:separator . newFileName, ':p')
         try
             call writefile([], newFilePath)
             execute 'edit ' . newFilePath
@@ -255,18 +291,18 @@ endfunction
 nnoremap <leader>e :call OpenExistingFile()<CR>
 
 function! OpenExistingFile()
-    let file_path = input('Open file in an existing directory: ', g:current_directory . g:separator, 'file')
+    let filePath = input('Open file in an existing directory: ', g:current_directory . g:separator, 'file')
+    let expandedPath = fnamemodify(expand(filePath), ':p')
 
-    let expanded_path = fnamemodify(expand(file_path), ':p')
-    if !isdirectory(expanded_path) && filereadable(expanded_path)
+    if !isdirectory(expandedPath) && filereadable(expandedPath)
         try
-            execute 'tabedit ' . expanded_path
-            echo "Opened: " . expanded_path . " in a new tab."
+            execute 'tabedit ' . expandedPath
+            echomsg "Opened: " . expandedPath . " in a new tab."
         catch
             echomsg 'Error: Unable to open the file.'
         endtry
     else
-        echo "Error: File does not exist or is a directory: " . expanded_path
+        echomsg "Error: File does not exist or is a directory: " . expandedPath
     endif
 endfunction
 
@@ -277,10 +313,10 @@ function! DeleteFileFromAnyExistingDirection()
     let fileName = input('Enter filename to delete: ', '', 'file')
 
     if fileName != ''
-        let existing_directory = input('Enter existing directory: ', g:current_directory, 'file')
-        let existing_directory = fnamemodify(existing_directory, ':p:h')
+        let existingDirectory = input('Enter existing directory: ', g:current_directory, 'file')
+        let existingDirectory = CreatePath(existingDirectory)
 
-        let filePath = fnamemodify(existing_directory . g:separator . fileName, ':p')
+        let filePath = fnamemodify(existingDirectory . g:separator . fileName, ':p')
 
         if filereadable(filePath)
             try
@@ -304,10 +340,10 @@ function! DeleteDirectoryFromAnyExistingDirection()
     let directoryName = input('Enter directory name to delete: ', '', 'dir')
 
     if directoryName != ''
-        let existing_directory = input('Enter existing directory: ', g:current_directory, 'dir')
-        let existing_directory = fnamemodify(existing_directory, ':p:h')
+        let existingDirectory = input('Enter existing directory: ', g:current_directory, 'dir')
+        let existingDirectory = CreatePath(existingDirectory)
 
-        let directoryPath = fnamemodify(existing_directory . g:separator . directoryName, ':p')
+        let directoryPath = fnamemodify(existingDirectory . g:separator . directoryName, ':p')
 
         if isdirectory(directoryPath)
             try
